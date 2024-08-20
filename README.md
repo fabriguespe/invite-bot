@@ -1,4 +1,4 @@
-# coinbase-mint-frame
+# invite-bot
 
 This project is generated using the [MessageKit](https://message-kit.vercel.app) v1.0.0 CLI and uses the `one-to-one` template. Below are the instructions to set up and run the project.
 
@@ -7,20 +7,21 @@ This project is generated using the [MessageKit](https://message-kit.vercel.app)
 Follow these steps to set up and run the project:
 
 1. **Navigate to the project directory:**
-    ```sh
-    cd ./coinbase-mint-frame
-    ```
+
+   ```sh
+   cd ./invite-bot
+   ```
 
 2. **Install dependencies:**
-    ```sh
-    bun install
-    ```
+
+   ```sh
+   bun install
+   ```
 
 3. **Run the project:**
-    ```sh
-    bun dev
-    ```
-
+   ```sh
+   bun dev
+   ```
 
 ## Variables
 
@@ -33,4 +34,5 @@ MSG_LOG=true # logs the message on the console
 ```
 
 ---
+
 Made with ❤️ by [Ephemera](https://ephemerahq.com)
