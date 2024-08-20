@@ -1,6 +1,5 @@
 import { run, HandlerContext, CommandHandlers } from "@xmtp/message-kit";
 import { Client } from "@notionhq/client";
-import { ethers } from "ethers";
 import { commands } from "./commands.js";
 import { getRedisClient } from "./lib/redis.js";
 import { handler as admin } from "./handler/admin.js";
@@ -82,10 +81,8 @@ run(async (context: HandlerContext) => {
         `You're all set, ${user.name}! You have been added to the waitlist. We'll let you know soon.`
       );
 
-      const provider = new ethers.providers.CloudflareProvider();
-      const resolvedAddress = await provider.resolveName(sender.address);
-
       // Create a new database
+      console.log(pageId);
       const newDatabase = await notion.pages.create({
         parent: {
           database_id: pageId as string,
@@ -130,15 +127,6 @@ run(async (context: HandlerContext) => {
               {
                 type: "text",
                 text: { content: sender.address as string },
-              },
-            ],
-          },
-          Domain: {
-            type: "rich_text",
-            rich_text: [
-              {
-                type: "text",
-                text: { content: resolvedAddress as string },
               },
             ],
           },
