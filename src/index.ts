@@ -59,27 +59,26 @@ run(async (context: HandlerContext) => {
       await context.send(
         "Welcome to X Marks The Spot! Ready for a private, meaningful experience? Let's get you set up."
       );
-      await context.send("Please share your full name.");
+      await context.send("What’s your full name?");
       inMemoryCacheStep.set(sender.address, 1);
       break;
     case 1:
       user.name = text;
       userData.set(sender.address, user);
-      await context.send("Which company are you with?");
+      await context.send("What project or company are you with?");
       inMemoryCacheStep.set(sender.address, 2);
       break;
     case 2:
       user.company = text;
       userData.set(sender.address, user);
-      await context.send("What's your role at " + user.company + "?");
+      await context.send(
+        "Tell us a bit more about what you do at " + user.company + "."
+      );
       inMemoryCacheStep.set(sender.address, 3);
       break;
     case 3:
       user.role = text;
       userData.set(sender.address, user);
-      await context.send(
-        `You're all set, ${user.name}! You have been added to the waitlist. We'll let you know soon.`
-      );
 
       // Create a new database
       console.log(pageId);
@@ -135,7 +134,7 @@ run(async (context: HandlerContext) => {
 
       await redisClient.set(sender.address, "subscribed");
       await context.send(
-        "Thanks! We've got everything we need. Stay tuned for more updates as we get closer to the event."
+        `You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
       );
       inMemoryCacheStep.delete(sender.address);
       userData.delete(sender.address);
