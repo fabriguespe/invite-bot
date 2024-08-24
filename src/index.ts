@@ -80,8 +80,6 @@ run(async (context: HandlerContext) => {
       user.role = text;
       userData.set(sender.address, user);
 
-      // Create a new database
-      console.log(pageId);
       const newDatabase = await notion.pages.create({
         parent: {
           database_id: pageId as string,
@@ -131,7 +129,7 @@ run(async (context: HandlerContext) => {
           },
         },
       });
-
+      console.log(user);
       await redisClient.set(sender.address, "subscribed");
       await context.send(
         `You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
