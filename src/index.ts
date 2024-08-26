@@ -79,7 +79,7 @@ run(async (context: HandlerContext) => {
     case 3:
       user.role = text;
       userData.set(sender.address, user);
-      await context.send("Wait a sec while we add you to the waitlist...");
+      //await context.send("Wait a sec while we add you to the waitlist...");
       const newDatabase = await notion.pages.create({
         parent: {
           database_id: pageId as string,
