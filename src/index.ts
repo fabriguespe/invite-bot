@@ -8,7 +8,7 @@ import { handler as admin } from "./handler/admin.js";
 const inMemoryCacheStep = new Map<string, number>();
 const userData = new Map<
   string,
-  { name?: string; company?: string; role?: string }
+  { name?: string; company?: string; role?: string; preference?: string }
 >();
 const redisClient = await getRedisClient();
 // Initialize Notion client
@@ -36,6 +36,16 @@ run(async (context: HandlerContext) => {
     },
   } = context;
 
+  // Check for stop word to reset steps
+  if (text.toLowerCase() === "stop" || text.toLowerCase() === "reset") {
+    inMemoryCacheStep.delete(sender.address);
+    userData.delete(sender.address);
+    await context.send(
+      "Your progress has been reset. You can start over whenever you're ready."
+    );
+    return;
+  }
+
   if (typeId !== "text") {
     /* If the input is not text do nothing */
     return;
@@ -48,9 +58,29 @@ run(async (context: HandlerContext) => {
 
   const isSubscribed = await redisClient.get(sender.address);
 
-  if (isSubscribed) {
+  if (isSubscribed && text.toLowerCase() === "yes") {
+    const pageId = await redisClient.get(`${sender.address}_pageId`);
+    await notion.pages.update({
+      page_id: pageId as string,
+      properties: {
+        RSVP: {
+          type: "select",
+          select: {
+            name: "Confirmed",
+          },
+        },
+      },
+    });
+    await context.send("Thank you for confirming your attendance!");
+  } else if (isSubscribed) {
     await context.send(
       "You're already in the waitlist! We'll let you know soon."
+    );
+    await context.send(
+      "Be sure to turn on notifications so you don't miss out on any updates."
+    );
+    await context.send(
+      "Had questions or issues with the bot? Message fabri.converse.xyz"
     );
     return;
   }
@@ -79,8 +109,15 @@ run(async (context: HandlerContext) => {
     case 3:
       user.role = text;
       userData.set(sender.address, user);
-      //await context.send("Wait a sec while we add you to the waitlist...");
-      const newDatabase = await notion.pages.create({
+      await context.send(
+        "Who would you like to see at the event from the space? You can mention their name or company."
+      );
+      inMemoryCacheStep.set(sender.address, 4);
+      break;
+    case 4:
+      user.preference = text;
+      userData.set(sender.address, user);
+      await notion.pages.create({
         parent: {
           database_id: pageId as string,
         },
@@ -112,6 +149,15 @@ run(async (context: HandlerContext) => {
               },
             ],
           },
+          Preference: {
+            type: "rich_text",
+            rich_text: [
+              {
+                type: "text",
+                text: { content: user.preference as string },
+              },
+            ],
+          },
           Status: {
             type: "select",
             select: {
@@ -133,6 +179,12 @@ run(async (context: HandlerContext) => {
       await redisClient.set(sender.address, "subscribed");
       await context.send(
         `Done. You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
+      );
+      await context.send(
+        "Be sure to turn on notifications so you don't miss out on any updates."
+      );
+      await context.send(
+        "Had questions or issues with the bot? Message fabri.converse.xyz"
       );
       inMemoryCacheStep.delete(sender.address);
       userData.delete(sender.address);
