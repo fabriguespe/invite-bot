@@ -58,7 +58,7 @@ run(async (context: HandlerContext) => {
 
   const isSubscribed = await redisClient.get(sender.address);
 
-  if (isSubscribed && text.toLowerCase() === "yes") {
+  if (isSubscribed && text.toLowerCase() === "confirm") {
     const pageId = await redisClient.get(`${sender.address}_pageId`);
     await notion.pages.update({
       page_id: pageId as string,
