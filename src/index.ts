@@ -79,7 +79,7 @@ run(async (context: HandlerContext) => {
     case 3:
       user.role = text;
       userData.set(sender.address, user);
-
+      await context.send("Wait a sec while we add you to the waitlist...");
       const newDatabase = await notion.pages.create({
         parent: {
           database_id: pageId as string,
@@ -132,7 +132,7 @@ run(async (context: HandlerContext) => {
       console.log(user);
       await redisClient.set(sender.address, "subscribed");
       await context.send(
-        `You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
+        `Done. You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
       );
       inMemoryCacheStep.delete(sender.address);
       userData.delete(sender.address);
