@@ -115,79 +115,87 @@ run(async (context: HandlerContext) => {
       inMemoryCacheStep.set(sender.address, 4);
       break;
     case 4:
-      user.preference = text;
-      userData.set(sender.address, user);
-      await notion.pages.create({
-        parent: {
-          database_id: pageId as string,
-        },
-        properties: {
-          Name: {
-            type: "title",
-            title: [
-              {
-                type: "text",
-                text: { content: user.name as string },
-              },
-            ],
+      try {
+        user.preference = text;
+        userData.set(sender.address, user);
+        await context.send("Adding you to the waitlist. Please wait...");
+        await notion.pages.create({
+          parent: {
+            database_id: pageId as string,
           },
-          Company: {
-            type: "rich_text",
-            rich_text: [
-              {
-                type: "text",
-                text: { content: user.company as string },
+          properties: {
+            Name: {
+              type: "title",
+              title: [
+                {
+                  type: "text",
+                  text: { content: user.name as string },
+                },
+              ],
+            },
+            Company: {
+              type: "rich_text",
+              rich_text: [
+                {
+                  type: "text",
+                  text: { content: user.company as string },
+                },
+              ],
+            },
+            Role: {
+              type: "rich_text",
+              rich_text: [
+                {
+                  type: "text",
+                  text: { content: user.role as string },
+                },
+              ],
+            },
+            Preference: {
+              type: "rich_text",
+              rich_text: [
+                {
+                  type: "text",
+                  text: { content: user.preference as string },
+                },
+              ],
+            },
+            Status: {
+              type: "select",
+              select: {
+                name: "Waitlist",
               },
-            ],
-          },
-          Role: {
-            type: "rich_text",
-            rich_text: [
-              {
-                type: "text",
-                text: { content: user.role as string },
-              },
-            ],
-          },
-          Preference: {
-            type: "rich_text",
-            rich_text: [
-              {
-                type: "text",
-                text: { content: user.preference as string },
-              },
-            ],
-          },
-          Status: {
-            type: "select",
-            select: {
-              name: "Waitlist",
+            },
+            Address: {
+              type: "rich_text",
+              rich_text: [
+                {
+                  type: "text",
+                  text: { content: sender.address as string },
+                },
+              ],
             },
           },
-          Address: {
-            type: "rich_text",
-            rich_text: [
-              {
-                type: "text",
-                text: { content: sender.address as string },
-              },
-            ],
-          },
-        },
-      });
-      console.log(user);
-      await redisClient.set(sender.address, "subscribed");
-      await context.send(
-        `Done. You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
-      );
-      await context.send(
-        "Be sure to turn on notifications so you don't miss out on any updates."
-      );
-      await context.send(
-        "Had questions or issues with the bot? Message fabri.converse.xyz"
-      );
-      inMemoryCacheStep.delete(sender.address);
-      userData.delete(sender.address);
+        });
+        console.log(user);
+        await redisClient.set(sender.address, "subscribed");
+        await context.send(
+          `Done. You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
+        );
+        await context.send(
+          "Be sure to turn on notifications so you don't miss out on any updates."
+        );
+        await context.send(
+          "Had questions or issues with the bot? Message fabri.converse.xyz"
+        );
+        inMemoryCacheStep.delete(sender.address);
+        userData.delete(sender.address);
+      } catch (error) {
+        console.error(error);
+        await context.send(
+          "There was an error adding you to the waitlist. Please message fabri.converse.xyz."
+        );
+      }
       break;
   }
 }, appConfig);

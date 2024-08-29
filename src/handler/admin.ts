@@ -23,8 +23,9 @@ export async function handler(context: HandlerContext) {
     await context.send("You are not authorized to use this command");
     return;
   }
-  if (params.address) {
-    await redisClient.del(params.address);
-    await context.send("Waitlist reset for " + params.address);
+  let address = sender.address ?? sender.address;
+  if (address) {
+    await redisClient.del(address);
+    await context.send("Waitlist reset for " + address);
   }
 }
