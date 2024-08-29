@@ -26,6 +26,7 @@ export async function handler(context: HandlerContext) {
   let address = sender.address ?? sender.address;
   if (address) {
     await redisClient.del(address);
+    await redisClient.del(`${address}_pageId`);
     await context.send("Waitlist reset for " + address);
   }
 }

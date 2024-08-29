@@ -60,6 +60,7 @@ run(async (context: HandlerContext) => {
 
   if (isSubscribed && text.toLowerCase() === "confirm") {
     const pageId = await redisClient.get(`${sender.address}_pageId`);
+    console.log(pageId);
     await notion.pages.update({
       page_id: pageId as string,
       properties: {
@@ -72,6 +73,23 @@ run(async (context: HandlerContext) => {
       },
     });
     await context.send("Thank you for confirming your attendance!");
+    return;
+  } else if (isSubscribed && text.toLowerCase() === "unconfirm") {
+    const pageId = await redisClient.get(`${sender.address}_pageId`);
+    console.log(pageId);
+    await notion.pages.update({
+      page_id: pageId as string,
+      properties: {
+        RSVP: {
+          type: "select",
+          select: {
+            name: "No",
+          },
+        },
+      },
+    });
+    await context.send("Thank you for unconfirming your attendance!");
+    return;
   } else if (isSubscribed) {
     await context.send(
       "You're already in the waitlist! We'll let you know soon."
@@ -119,7 +137,7 @@ run(async (context: HandlerContext) => {
         user.preference = text;
         userData.set(sender.address, user);
         await context.send("Adding you to the waitlist. Please wait...");
-        await notion.pages.create({
+        const page = await notion.pages.create({
           parent: {
             database_id: pageId as string,
           },
@@ -179,6 +197,7 @@ run(async (context: HandlerContext) => {
         });
         console.log(user);
         await redisClient.set(sender.address, "subscribed");
+        await redisClient.set(`${sender.address}_pageId`, page.id);
         await context.send(
           `Done. You are on the waitlist, ${user.name}! Since this is a small, private event, space is limited - but we are working hard to get you in.`
         );
